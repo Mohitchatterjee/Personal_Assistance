@@ -3,16 +3,35 @@ import os
 import pyttsx3
 import pywhatkit as kit
 import speech_recognition as sr
+import time 
+import datetime 
 import psutil
-import smtplib as s
-import datetime
+import smtplib as s 
 import winsound
 import phonenumbers 
 from phonenumbers import geocoder
 from win10toast import ToastNotifier
+from twilio.rest import Client 
+from verify_email import verify_email
 engine = pyttsx3.init()
 voices = engine.getProperty('voices')       
 engine.setProperty('voice', voices[1].id)  #male voice=0 and female voice=1
+def valid_email(email):
+     return verify_email(email)
+def wishMe(): 
+    hour = int(datetime.datetime.now().hour) 
+    if hour>= 0 and hour<12: 
+        engine = pyttsx3.init()
+        engine.say("Good Morning Mohit Sir !") 
+        engine.runAndWait()
+    elif hour>= 12 and hour<18: 
+        engine = pyttsx3.init()
+        engine.say("Good Aftrnoon Mohit Sir !") 
+        engine.runAndWait()  
+    else: 
+        engine = pyttsx3.init()
+        engine.say("Good evening Mohit Sir !") 
+        engine.runAndWait() 
 def battery_info():
             a=psutil.sensors_battery()
             p=str(a.percent)
@@ -32,7 +51,9 @@ def system_info():
              engine.say(" and your system has "+p+" percent battery now")
              engine.runAndWait()
 def shutdown():
-           os.system('shutdown /s /t 30')
+           os.system('shutdown /s /t 10')
+def restart():
+           os.system('shutdown /r /t 10')
 def sendWhatsapp():
            num=str(input('Number: '))
            num1='+91'+str(num)
@@ -105,7 +126,8 @@ while True:
  a=r.recognize_google(audio)
  if ('Infi' in a or 'Infy' in a or 'Hello' in a or 'Hi' in a or 'Hey' in a or 'infi' in a or 'infy' in a or 'hello' in a or 'hi' in a or 'hey' in a or 'ok' in a or 'Ok' in a) and ('Infi' in a or 'Infy' in a or 'Hello' in a or 'Hi' in a or 'Hey' in a or 'infi' in a or 'infy' in a or 'hello' in a or 'hi' in a or 'hey' in a):
    engine = pyttsx3.init()
-   engine.say("Hi Mohit sir\n I am Your In-fee\n What can i do for you.....\n I am listening your choice sir")
+   wishMe()
+   engine.say("I am Your In-fee\n I am listening sir")
    engine.runAndWait()
    while True:
      voices = engine.getProperty('voices')       
@@ -217,13 +239,12 @@ while True:
            engine.say("sure sir...can you please provide me a number , message and delivered timing here..")
            engine.runAndWait()
            sendWhatsapp()
-     elif ("check" in n or 'phone number' in n or 'valid' in n or 'validation' in n):
-          engine = pyttsx3.init()
-          engine.say("sure sir...can you write a number here..")
-          engine.runAndWait()
-          nums=input()
-          num='+91' +nums
-          print(phn_num_valid(num))
+    # elif ("check" in n or 'phone number' in n or 'valid' in n or 'validation' in n):
+     ##    engine.say("sure sir...can you write a number here..")
+      #    engine.runAndWait()
+       #   nums=input()
+        #  num='+91' +nums
+        #  print(phn_num_valid(num))
      elif ('configuration' in n or 'status' in n) and ('system' in n or ' machine' in n or ' lappy' in n or 'lappi' in n or 'pc' in n or 'computer' in n or 'laptop' in n):
             system_info()
      elif ('battery' in n or 'power' in n) and ('battery' in n or 'power' in n):
@@ -265,8 +286,43 @@ while True:
                engine = pyttsx3.init()
                engine.say("ok sir")
                engine.runAndWait()
+     elif('restart' in n or 'Restart' in n or 'RESTART' in n):
+           engine = pyttsx3.init()
+           engine.say("do you really want me to Restart")
+           engine.runAndWait()
+           r=sr.Recognizer()
+           with sr.Microphone() as mic:
+                    r.pause_threshold=0.7
+                    audio=r.listen(mic)
+           print(r.recognize_google(audio)) 
+           ans=r.recognize_google(audio)
+           if('yes' in ans or 'Yes' in ans):
+               engine = pyttsx3.init()
+               engine.say("sure sir....I restart your system...please wait...")
+               engine.runAndWait()
+               restart()
+           else:
+               engine = pyttsx3.init()
+               engine.say("ok sir")
+               engine.runAndWait()
      elif ('Alarm' in n or 'alarm' in n or 'remind' in n or 'Remind' in n or 'Reminder' in n or 'reminder' in n):
            alrm()
+     elif('check' in a or 'Check' in a or 'valid' in a or 'Valid' in a or 'Email' in a or 'email' in a):
+              engine = pyttsx3.init() 
+              engine.say('please enter email id sir')
+              engine.runAndWait()
+              email=input()
+              reply=valid_email(email)
+              if reply==True:
+                 engine = pyttsx3.init() 
+                 engine.say('Email is valid sir')
+                 print('Email is valid')
+                 engine.runAndWait()  
+              else:
+                 engine = pyttsx3.init() 
+                 engine.say('Email is not valid sir')
+                 print('Email is not valid')
+                 engine.runAndWait()
      elif ('How' in n or 'how' in n ) and ('You' in n or 'you' in n ):
               engine = pyttsx3.init()
               engine.say("I am Pretty good sir.\n what about you\n how was your day?")
@@ -288,19 +344,33 @@ while True:
               else:
                   engine = pyttsx3.init()
                   engine.say("hmm.....")
-                  engine.runAndWait()  
+                  engine.runAndWait() 
      elif ('Name' in n or 'name' in n or 'MY' in n or 'My' in n or 'my' in n or 'Owner' in n  or 'owner' in n) and ('Tell' in n or 'tell' in n or 'Owner' in n  or 'owner' in n):
              engine = pyttsx3.init() 
              engine.say("His name is Mohit Chatterjee\n He is very talented Guy \n and you know...\n I am very glad that he create me")
              engine.runAndWait() 
-     #SENDING ONE MESSAGE TO MULTIPLE USER BY TYPYING NUMBER OF USER AND THEIR MAIL ID AND SUBJECT AND WRITE JUST ONE MESSAGE.
+     elif 'the time' in n: 
+            hour = int(datetime.datetime.now().hour)
+            minute = int(datetime.datetime.now().minute) 
+            engine = pyttsx3.init()
+            engine.say("Sir the time is") 
+            if hour>=12 and hour<24:
+              engine.say(hour)
+              engine.say(minute)
+              engine.say('pm')
+              engine.runAndWait() 
+            else:
+               engine.say(hour)
+               engine.say(minute)
+               engine.say('am')
+               engine.runAndWait()
      elif('send' in n or 'Send' in n or 'mail' in n or 'Mail' in n) and ('someone' in n or 'Someone' in n):
         engine = pyttsx3.init() 
         engine.say('sure sir')
         engine.runAndWait()
         ob=s.SMTP('smtp.gmail.com',587)
         ob.starttls()
-        ob.login(your_mail,your_mail_pass)
+        ob.login('chatterjeemohit160@gmail.com','1804@Survival')
         engine = pyttsx3.init() 
         engine.say('could you please know me the number of receivers...')
         print('Number of Receivers:\n')
@@ -414,3 +484,4 @@ while True:
            engine = pyttsx3.init()
            engine.say("UHM....sorry.....I didn't recognize you sir\n speak again please....")
            engine.runAndWait()   
+   
